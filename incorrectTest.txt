@@ -1,0 +1,9 @@
+PROGRAM TIM2;
+INTEGER -> mysampleid1, mysampleid2, mysampleid3;
+
+BEGIN
+mysampleid1 <= ((0 * 155) / 5) - 12;
+mysampleid2 <= (13 - (10 + 12)) * 4;
+mysampleid3 <= 19 * ((22 / 11) * 28 )
+
+END.w
