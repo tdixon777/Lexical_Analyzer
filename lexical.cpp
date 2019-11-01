@@ -29,96 +29,8 @@ void lexical::lexicalAnalysis(string fileName) //same as lex() in book
 	}
 }
 
-void lexical::parse(lexical &lexObject, string fileName)
-{
-	myStream.open(fileName);
-
-	if(!myStream.is_open())
-		cout<<"ERROR - CANNOT OPEN FILE\n";
-	else
-	{
-		cout<<"program is open"<<endl;
-	}
-	getChar();// maybe
-	lex();
-	program(lexObject);
 
 
-}
-
-int lexical::lookUp(char ch)
-{
-	//cout<<"lookUp Entered"<<endl;
-	//cout<<"ch is "<<ch<<endl;
-	switch(ch)
-	{
-		cout<<"switch Entered, nextToken is "<<ch<<endl;
-		case '(':
-			addChar();
-			nextToken = LEFT_PAREN;
-			break;
-
-		case ')':
-			addChar();
-			nextToken = RIGHT_PAREN;
-			break;
-		case '+':
-			addChar();
-			nextToken = PLUS;
-			break;
-
-		case '-':
-			addChar();
-			nextToken = MINUS;
-			nextChar = myStream.get();
-			if(nextChar == '>')
-			{
-				addChar();
-				nextToken = DECLARER;
-			}
-			break;
-
-		case '*':
-			addChar();
-			nextToken = TIMES;
-			break;
-
-		case '/':
-			addChar();
-			nextToken = DIVIDE;
-			break;
-
-		case '<':
-			addChar();
-			getChar();
-			addChar();
-			nextToken = ASSIGN_OP;
-			break;
-
-		case '.':
-			addChar();
-			nextToken = PERIOD;
-			break;
-
-		case ',':
-			addChar();
-			nextToken = COMMA;
-			break;
-
-		case ';':
-			//cout<<"semicolon case Entered"<<endl;
-			addChar();
-			nextToken = SEMICOLON;
-			break;
-
-		default:
-			addChar();
-			nextToken = EOF; 
-			break;
-	}
-
-	return nextToken;
-}
 
 void lexical::addChar()
 {
@@ -215,90 +127,199 @@ int lexical::lex()
 	return nextToken;
 }
 
-
-	void lexical::program(lexical &lexObject)
+int lexical::lookUp(char ch)
+{
+	//cout<<"lookUp Entered"<<endl;
+	//cout<<"ch is "<<ch<<endl;
+	switch(ch)
 	{
-		
-		cout<<"Enter program"<<endl;
-		//cout<<"Token is "<<nextToken<<endl;
-		lex(); //get first token
-		
-		if(nextToken == ID)
-		{
-			lex();
-			if(nextToken == SEMICOLON)
+		cout<<"switch Entered, nextToken is "<<ch<<endl;
+		case '(':
+			addChar();
+			nextToken = LEFT_PAREN;
+			break;
+
+		case ')':
+			addChar();
+			nextToken = RIGHT_PAREN;
+			break;
+		case '+':
+			addChar();
+			nextToken = PLUS;
+			break;
+
+		case '-':
+			addChar();
+			nextToken = MINUS;
+			nextChar = myStream.get();
+			if(nextChar == '>')
 			{
-				lex(); //maybe
-				lexObject.declaration(lexObject);
-				lexObject.body(lexObject);
+				addChar();
+				nextToken = DECLARER;
 			}
-			else
-				error();
+			break;
+
+		case '*':
+			addChar();
+			nextToken = TIMES;
+			break;
+
+		case '/':
+			addChar();
+			nextToken = DIVIDE;
+			break;
+
+		case '<':
+			addChar();
+			getChar();
+			addChar();
+			nextToken = ASSIGN_OP;
+			break;
+
+		case '.':
+			addChar();
+			nextToken = PERIOD;
+			break;
+
+		case ',':
+			addChar();
+			nextToken = COMMA;
+			break;
+
+		case ';':
+			//cout<<"semicolon case Entered"<<endl;
+			addChar();
+			nextToken = SEMICOLON;
+			break;
+
+		default:
+			addChar();
+			nextToken = EOF; 
+			break;
+	}
+
+	return nextToken;
+}
+
+//Functions for Parser ***************************************************
+void lexical::parse(lexical &lexObject, string fileName)
+{
+	myStream.open(fileName);
+
+	if(!myStream.is_open())
+		cout<<"ERROR - CANNOT OPEN FILE\n";
+	else
+	{
+		cout<<"program is open"<<endl;
+	}
+	getChar();// maybe
+	lex();
+	program(lexObject);
+
+
+}
+void lexical::program(lexical &lexObject)
+{
+
+	cout<<"Enter program"<<endl;
+	//cout<<"Token is "<<nextToken<<endl;
+	lex(); //get first token
+
+	if(nextToken == ID)
+	{
+		lex();
+		if(nextToken == SEMICOLON)
+		{
+			lex(); //maybe
+			lexObject.declaration(lexObject);
+			lexObject.body(lexObject);
 		}
 		else
 			error();
+	}
+	else
+		error();
 
-		if(nextToken == PERIOD)
-		{	
+	if(nextToken == PERIOD)
+	{	
+		lex();
+		if(nextToken!=EOF)
+			error();
+	}
+	else
+		error();	
+	cout<<"Exit <program>"<<endl;
+	cout<<"Program Finished"<<endl;
+
+}
+void lexical::body(lexical &lexObject)
+{
+	cout<<"<Enter body>"<<endl;
+
+	if(nextToken == ID)
+	{
+		lex();
+
+		lexObject.statList(lexObject);
+	}	
+	else
+		error();
+
+
+
+	if(nextToken == ID)
+		lex();
+	else
+		error();
+
+	cout<<"Exit <body>"<<endl;
+
+}
+
+void lexical::declaration(lexical &lexObject)
+{
+	cout<<"Enter <declaration>"<<endl;
+	if(nextToken == ID)
+	{
+		lex();
+		if(nextToken == DECLARER)
+		{
 			lex();
-			if(nextToken!=EOF)
+			lexObject.idList(lexObject);
+			if(nextToken == SEMICOLON)
+				lex();
+			else
 				error();
 		}
 		else
 			error();	
-		cout<<"Exit <program>"<<endl;
-		cout<<"Program Finished"<<endl;
-				
-	}
-	void lexical::body(lexical &lexObject)
+	}	
+
+	cout<<"Exit <declaration>"<<endl;
+}
+
+void lexical::idList(lexical &lexObject)
+{
+	cout<<"Enter <idlist>"<<endl;
+	if(nextToken == ID)
 	{
-		cout<<"<Enter body>"<<endl;
-		
-		if(nextToken == ID)
-		{
-			lex();
-
-			lexObject.statList(lexObject);
-		}	
-		else
-			error();
-
-		
-
-		if(nextToken == ID)
-			lex();
-		else
-			error();
-
-		cout<<"Exit <body>"<<endl;
-
+		lex();
+		lexObject.idList2(lexObject);
 	}
+	else
+		error();
 
-	void lexical::declaration(lexical &lexObject)
-	{
-		cout<<"Enter <declaration>"<<endl;
-		if(nextToken == ID)
-		{
-			lex();
-			if(nextToken == DECLARER)
-			{
-				lex();
-				lexObject.idList(lexObject);
-				if(nextToken == SEMICOLON)
-					lex();
-				else
-					error();
-			}
-			else
-				error();	
-		}	
+	cout<<"Exit <idlist>"<<endl;
+}
 
-		cout<<"Exit <declaration>"<<endl;
-	}
+void lexical::idList2(lexical &lexObject)
+{
 
-	void lexical::idList(lexical &lexObject)
-	{
-		cout<<"Enter <idlist>"<<endl;
+	cout<<"Enter idlist2"<<endl;
+	if(nextToken == COMMA)
+	{			
+		lex();
+
 		if(nextToken == ID)
 		{
 			lex();
@@ -306,167 +327,148 @@ int lexical::lex()
 		}
 		else
 			error();
+		cout<<"Exit <idlist2>"<<endl;
+	}
+}
 
-		cout<<"Exit <idlist>"<<endl;
+void lexical::statList(lexical &lexObject)
+{
+	cout<<"Enter <statlist>"<<endl;
+	if(nextToken == ID)
+	{
+		lexObject.statement(lexObject);
+		lexObject.statList2(lexObject);
+	}
+	else
+		error();
+
+	cout<<"Exit <statlist>"<<endl;
+
+
+
+}
+
+void lexical::statList2(lexical &lexObject)
+{
+	cout<<"Enter <statlist2>"<<endl;
+	if(nextToken == SEMICOLON)
+	{	
+		lex();
+		lexObject.statement(lexObject);
+		lexObject.statList2(lexObject);
 	}
 
-	void lexical::idList2(lexical &lexObject)
-	{
-		
-		cout<<"Enter idlist2"<<endl;
-		if(nextToken == COMMA)
-		{			
-			lex();
-			
-			if(nextToken == ID)
-			{
-				lex();
-				lexObject.idList2(lexObject);
-			}
-			else
-				error();
-			cout<<"Exit <idlist2>"<<endl;
-		}
-	}
+	cout<<"Exit <statList2>"<<endl;
 
-	void lexical::statList(lexical &lexObject)
+}
+
+void lexical::statement(lexical &lexObject)
+{
+	cout<<"Enter <statement>"<<endl;
+	if(nextToken == ID)
 	{
-		cout<<"Enter <statlist>"<<endl;
-		if(nextToken == ID)
+		lex();
+		if( nextToken == ASSIGN_OP)
 		{
-			lexObject.statement(lexObject);
-			lexObject.statList2(lexObject);
+			lex();
+			lexObject.expression(lexObject);
 		}
 		else
 			error();
-
-		cout<<"Exit <statlist>"<<endl;
-		
-		
-		
 	}
+	else
+		error();
 
-	void lexical::statList2(lexical &lexObject)
+	cout<<"Exit <statement>"<<endl;
+
+}
+
+void lexical::expression(lexical &lexObject)
+{
+	//lex();
+	cout<<"Enter <expression>"<<endl;
+
+
+	lexObject.term(lexObject);
+	lexObject.expression2(lexObject);
+
+	cout<<"Exit <expression>"<<endl;
+}
+
+void lexical::expression2(lexical &lexObject)
+{
+	cout<<"Enter <expression2>"<<endl;
+
+	if(nextToken == PLUS || nextToken == MINUS)
 	{
-		cout<<"Enter <statlist2>"<<endl;
-		if(nextToken == SEMICOLON)
-		{	
-			lex();
-			lexObject.statement(lexObject);
-			lexObject.statList2(lexObject);
-		}
-
-		cout<<"Exit <statList2>"<<endl;
-
-	}
-
-	void lexical::statement(lexical &lexObject)
-	{
-		cout<<"Enter <statement>"<<endl;
-		if(nextToken == ID)
-		{
-			lex();
-			if( nextToken == ASSIGN_OP)
-			{
-				lex();
-				lexObject.expression(lexObject);
-			}
-			else
-				error();
-		}
-		else
-			error();
-
-		cout<<"Exit <statement>"<<endl;
-		
-	}
-
-	void lexical::expression(lexical &lexObject)
-	{
-		//lex();
-		cout<<"Enter <expression>"<<endl;
-		
-		
+		lex();
 		lexObject.term(lexObject);
 		lexObject.expression2(lexObject);
-
-		cout<<"Exit <expression>"<<endl;
 	}
 
-	void lexical::expression2(lexical &lexObject)
-	{
-		cout<<"Enter <expression2>"<<endl;
-		
-		if(nextToken == PLUS || nextToken == MINUS)
-		{
-			lex();
-			lexObject.term(lexObject);
-			lexObject.expression2(lexObject);
-		}
+	cout<<"Exit <expression2>"<<endl;
+}
 
-		cout<<"Exit <expression2>"<<endl;
-	}
+void lexical::term(lexical &lexObject)
+{
+	cout<<"Enter <term>"<<endl;
+	lexObject.factor(lexObject);
+	lexObject.term2(lexObject);
+	cout<<"Enter <term>"<<endl;
 
-	void lexical::term(lexical &lexObject)
+}
+
+void lexical::term2(lexical &lexObject)
+{
+	cout<<"Enter <term2>"<<endl;
+	if(nextToken == TIMES || nextToken == DIVIDE )
 	{
-		cout<<"Enter <term>"<<endl;
+		lex();
 		lexObject.factor(lexObject);
 		lexObject.term2(lexObject);
-		cout<<"Enter <term>"<<endl;
-		
 	}
 
-	void lexical::term2(lexical &lexObject)
+	//lexObject.factor(lexObject);
+
+	cout<<"Exit <term2>"<<endl;
+
+
+
+}
+
+void lexical::factor(lexical &lexObject)
+{
+	cout<<"Enter <factor>"<<endl;
+	if(nextToken == CONST || nextToken == ID)
 	{
-		cout<<"Enter <term2>"<<endl;
-		if(nextToken == TIMES || nextToken == DIVIDE )
-		{
-			lex();
-			lexObject.factor(lexObject);
-			lexObject.term2(lexObject);
-		}
-
-		//lexObject.factor(lexObject);
-
-		cout<<"Exit <term2>"<<endl;
-		
-		
-
+		lex();
 	}
-
-	void lexical::factor(lexical &lexObject)
+	else
 	{
-		cout<<"Enter <factor>"<<endl;
-		if(nextToken == CONST || nextToken == ID)
-		{
+		 if(nextToken == LEFT_PAREN)
+		 {
 			lex();
-		}
-		else
-		{
-			 if(nextToken == LEFT_PAREN)
-			 {
+			lexObject.expression(lexObject);
+			if(nextToken == RIGHT_PAREN)
+			{
 				lex();
-				lexObject.expression(lexObject);
-				if(nextToken == RIGHT_PAREN)
-				{
-					lex();
-					
-				}
-				else
-					error();
-			 }
-			 else
-				 error();
-		}
 
-		cout<<"Exit <factor>"<<endl;
+			}
+			else
+				error();
+		 }
+		 else
+			 error();
 	}
 
-	void lexical:: error()
-	{
-		
-		cout<<"error, program crashed";
-		int a;
-		cin>>a;
+	cout<<"Exit <factor>"<<endl;
+}
 
-	}
+void lexical:: error()
+{
+
+	cout<<"error, program crashed";
+	int a;
+	cin>>a;
+
+}
