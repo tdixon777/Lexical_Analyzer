@@ -44,10 +44,10 @@ public:
 	fstream myStream;
 
 	//functions for the lexical analyzer
+	void lexicalAnalysis(string fileName);
 	void addChar();
 	void getChar();
 	void getNonBlank();
-	void lexicalAnalysis(string fileName);
 	int lex();
 	int lookUp(char ch);
 
