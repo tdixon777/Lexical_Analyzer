@@ -14,11 +14,10 @@ int main()
 		cout<<"ERROR - CANNOT OPEN FILE\n";*/
 	
 	//string fileName;
-	lexical mylex;
 	
 	//mylex.lexicalAnalysis("test1.txt"); //calling function to perform lexical analysis
 	
-	
+	lexical mylex;
 	mylex.parse(mylex,"incorrectTest.txt");
 
 	int a;
